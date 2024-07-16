@@ -13,8 +13,8 @@ import { UserThread } from './entitys/user-thread.entity';
       host: 'localhost',
       port: 3306,
       username: 'boughani',
-      password: 'boughani',
-      database: 'test',
+      password: 'hackerdz@123-',
+      database: 'parene_assistant',
       entities: [UserThread],
       synchronize: true,
       

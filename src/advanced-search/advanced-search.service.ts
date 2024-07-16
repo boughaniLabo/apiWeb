@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
+import { getJson } from 'serpapi';
 const xml2js = require('xml2js');
 
 @Injectable()
 export class AdvancedSearchService {
+  private apiKey = 'bba1c0f96fcd716aec8501ac9ac15fe9e4cb336dec09c0b28eecbcb32fc8c12c';
     async searchArxiv(body): Promise<any> {
         const base_url = 'http://export.arxiv.org/api/query';
         const { query, author, max_results = 10, start = 0, sort_by = 'relevance', sort_order = 'descending' } = body;
@@ -238,5 +240,49 @@ export class AdvancedSearchService {
           throw error;
         }
       }
+      async fetchResults(query: string, location: string, engine: string): Promise<any> {
+        let response;
     
+        switch (engine) {
+          case 'google_jobs':
+            response = await getJson({
+              api_key: this.apiKey,
+              engine: 'google_jobs',
+              google_domain: 'google.fr',
+              q: query,
+              hl: 'fr',
+              gl: 'fr',
+              location: location,
+            });
+            break;
+          case 'youtube':
+            response = await getJson({
+              api_key: this.apiKey,
+              engine: 'youtube',
+              search_query: query,
+            });
+            break;
+          case 'google_news':
+            response = await getJson({
+              api_key: this.apiKey,
+              engine: 'google_news',
+              gl: 'fr',
+              q: query,
+            });
+            break;
+          case 'google_scholar':
+            response = await getJson({
+              api_key: this.apiKey,
+              engine: 'google_scholar',
+              q: query,
+              hl: 'fr',
+              as_ylo: '2024',
+            });
+            break;
+          default:
+            throw new Error('Unsupported engine');
+        }
+    
+        return response;
+      }
 }
