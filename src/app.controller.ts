@@ -1,25 +1,40 @@
-import { Body, Controller, Get, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { createReadStream } from 'fs';
 import express, {Request, Response} from 'express';
+import { UserThread } from './entities/user-thread.entity';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post("")
+  @Post('')
   async handleThread(
     @Body('userId') userId: number,
     @Body('assistantId') assistantId: string,
   ) {
     const data = await this.appService.getOrCreateThread(userId, assistantId);
+    console.log(data);
     return { data };
   }
   @Post("message")
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
       destination: './uploads',
       filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
@@ -56,7 +71,8 @@ export class AppController {
       '.txt': 'text/plain',
       '.jpg': 'image/jpeg',
       '.png': 'image/png',
-      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      '.xlsx':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       // Add more as needed
     };
 
@@ -69,6 +85,88 @@ export class AppController {
     });
 
     fileStream.pipe(res);
+  }
 
+  /*@Post('/thread')
+  async createThread(
+    @Body('userId') userId: number,
+    @Body('assistantId') assistantId: string,
+  ): Promise<any> {
+    const createdThread = await this.appService.createThread(
+      userId,
+      assistantId,
+    );
+    return { message: 'Thread created successfully', thread: createdThread };
+  }*/
+
+  @Get('/thread/:userId')
+  async getThreadsByUserId(
+    @Param('userId') userId: number,
+  ): Promise<UserThread[]> {
+    return this.appService.getThreadsByUserId(userId);
+  }
+
+  @Get('/thread/:assistantId')
+  async getThreadsByAssistant(
+    @Param('assistantID') assistantID: string,
+  ): Promise<UserThread[]> {
+    return this.appService.getThreadsByAssistantId(assistantID);
+  }
+
+  @Delete('/thread/:id')
+  async deleteUserThread(@Param('id') id: number, @Res() res): Promise<void> {
+    try {
+      const deleted = await this.appService.deleteUserThread(id);
+      if (deleted) {
+        res.status(HttpStatus.OK).json({
+          message: 'Thread deleted successfully',
+        });
+      } else {
+        res.status(HttpStatus.NOT_FOUND).json({
+          message: 'Thread not found',
+        });
+      }
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Failed to delete thread',
+        error: error.message,
+      });
+    }
+  }
+
+  @Post('/thread/:id/message')
+  async createMessageThread(
+    @Param('id') id: number,
+    @Body('message') message: string,
+  ): Promise<string> {
+    return this.appService.createMessage(id, message);
+  }
+
+  @Get('/thread/:id/message')
+  async getMessages(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    return this.appService.getMessages(id);
+  }
+
+  @Post('/thread/create-get-thread')
+  async createGetThread(
+    @Body('userId') userId: number,
+    @Body('threadId') threadId: string,
+    @Body('assistantId') assistantId: string,
+    @Body('message') message?: string,
+  ): Promise<any> {
+    return this.appService.createGetThread(
+      userId,
+      threadId,
+      assistantId,
+      message,
+    );
+  }
+
+  @Post('/thread/:assistantId')
+  async getThreadsByUserAndAssistant(
+    @Param('assistantId') assistantId: string,
+    @Body('userId') userId: number,
+  ): Promise<UserThread[]> {
+    return this.appService.getThreadsByUserAndAssistant(userId, assistantId);
   }
 }
