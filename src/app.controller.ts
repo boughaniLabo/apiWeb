@@ -113,10 +113,14 @@ export class AppController {
     return this.appService.getThreadsByAssistantId(assistantID);
   }
 
-  @Delete('/thread/:id')
-  async deleteUserThread(@Param('id') id: number, @Res() res): Promise<void> {
+  @Delete('/thread/:threadId')
+  async deleteUserThread(
+    @Param('threadId') threadId: string,
+    @Body('userId') userId: number,
+    @Res() res,
+  ): Promise<void> {
     try {
-      const deleted = await this.appService.deleteUserThread(id);
+      const deleted = await this.appService.deleteUserThread(userId, threadId);
       if (deleted) {
         res.status(HttpStatus.OK).json({
           message: 'Thread deleted successfully',

@@ -191,12 +191,14 @@ export class AppService {
     return this.userThreadRepository.find({ where: { assistantId } });
   }
 
-  async deleteUserThread(id: number): Promise<boolean> {
-    const thread = await this.userThreadRepository.findOne({ where: { id } });
+  async deleteUserThread(userId: number, threadId: string): Promise<boolean> {
+    const thread = await this.userThreadRepository.findOne({
+      where: { userId, threadId },
+    });
 
     if (thread) {
       try {
-        await this.openai.beta.threads.del(thread.threadId);
+        await this.openai.beta.threads.del(threadId);
         await this.userThreadRepository.delete(thread.id);
         return true;
       } catch (error) {
