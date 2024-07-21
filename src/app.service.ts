@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserThread } from './entities/user-thread.entity';
 import { Repository } from 'typeorm';
@@ -39,6 +39,17 @@ export class AppService {
 
     return userThread;
   }
+  async createThread(  userId: number,
+    assistantId: string,){
+      const newThread = await this.openai.beta.threads.create();
+      let userThread = this.userThreadRepository.create({
+        userId,
+        threadId: newThread.id,
+        assistantId,
+      });
+     return  await this.userThreadRepository.save(userThread);
+
+  }
   async getFileType(filePath: string): Promise<string | null> {
     try {
       const mimeType = mime.lookup(filePath);
@@ -56,14 +67,27 @@ export class AppService {
     assistantId: string,
     message: string,
     filePath: string,
+    threadId:string
   ): Promise<any> {
-    let userThread: any = await this.userThreadRepository.findOne({
-      where: { userId, assistantId },
-    });
-    if (!userThread) {
+    let userThread:any ; 
+    console.log("loggggggggg",threadId);
+    
+    if(threadId){
+      console.log("loggggggggg",threadId);
+       userThread = await this.userThreadRepository.findOne({
+        where: { userId, assistantId , threadId },
+      });
+      if(!userThread){
+      throw new NotFoundException(`No thread here`);
+      }
       userThread = await this.getOrCreateThread(userId, assistantId);
+    }else {
+      userThread = await this.createThread(userId, assistantId);
     }
-
+     
+    console.log(userThread);
+    
+ 
     const content = [];
     let attachement = null;
 

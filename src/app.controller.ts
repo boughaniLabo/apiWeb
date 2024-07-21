@@ -18,6 +18,7 @@ import { extname, join } from 'path';
 import { createReadStream } from 'fs';
 import express, {Request, Response} from 'express';
 import { UserThread } from './entities/user-thread.entity';
+import { threadId } from 'worker_threads';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -45,10 +46,11 @@ export class AppController {
     @Body('userId') userId: number,
     @Body('assistantId') assistantId: string,
     @Body('message') message: string,
+    @Body('threadId') threadId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
     const filePath:any = file ? join(__dirname, '..', 'uploads', file.filename) : null;
-    const data = await this.appService.addMessageAndFileToThread(userId, assistantId, message, filePath);
+    const data = await this.appService.addMessageAndFileToThread(userId, assistantId, message, filePath,threadId);
     return { data };
   }
   @Get('download/:id')

@@ -4,13 +4,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 async function bootstrap() {
-  const httpsOptions = {
-    key: fs.readFileSync(path.join(__dirname, '../.certs/key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '../.certs/cert.pem')),
-  };
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions,
-  });
+
+  const app = await NestFactory.create(AppModule);
   app.enableCors();
   await app.listen(3000);
 }
