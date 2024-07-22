@@ -80,7 +80,6 @@ export class AppService {
       if(!userThread){
       throw new NotFoundException(`No thread here`);
       }
-      userThread = await this.getOrCreateThread(userId, assistantId);
     }else {
       userThread = await this.createThread(userId, assistantId);
     }
@@ -255,13 +254,13 @@ export class AppService {
     }
   }
 
-  async getMessages(id: number): Promise<any> {
-    const thread = await this.userThreadRepository.findOne({ where: { id } });
+  async getMessages(threadId:string, userId: number): Promise<any> {
+    const thread = await this.userThreadRepository.findOne({ where: { userId,threadId } });
 
     if (thread) {
       try {
         const response = await this.openai.beta.threads.messages.list(
-          thread.threadId,
+          threadId,
         );
         return response;
       } catch (err) {

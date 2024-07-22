@@ -148,9 +148,9 @@ export class AppController {
     return this.appService.createMessage(id, message);
   }
 
-  @Get('/thread/:id/message')
-  async getMessages(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return this.appService.getMessages(id);
+  @Get('/thread/:threadId/message')
+  async getMessages(@Param('threadId') threadId: string, @Body('userId') userId:number): Promise<any> {
+    return this.appService.getMessages(threadId,userId);
   }
 
   @Post('/thread/create-get-thread')
