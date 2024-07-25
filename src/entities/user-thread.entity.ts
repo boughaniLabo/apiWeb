@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class UserThread {
@@ -13,4 +13,7 @@ export class UserThread {
 
   @Column()
   assistantId: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

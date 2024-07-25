@@ -32,7 +32,7 @@ export class AppController {
     console.log(data);
     return { data };
   }
-  @Post("message")
+  @Post("/message")
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -108,12 +108,12 @@ export class AppController {
     return this.appService.getThreadsByUserId(userId);
   }
 
-  @Get('/thread/:assistantId')
+  /*@Get('/thread/:assistantId')
   async getThreadsByAssistant(
     @Param('assistantID') assistantID: string,
   ): Promise<UserThread[]> {
     return this.appService.getThreadsByAssistantId(assistantID);
-  }
+  }*/
 
   @Delete('/thread/:threadId')
   async deleteUserThread(
