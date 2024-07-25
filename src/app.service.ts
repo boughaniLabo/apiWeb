@@ -222,7 +222,7 @@ export class AppService {
     if (thread) {
       try {
         await this.openai.beta.threads.del(threadId);
-        await this.userThreadRepository.delete(threadId);
+        await this.userThreadRepository.delete({threadId});
         return true;
       } catch (error) {
         console.error('Error deleting user thread:', error);
